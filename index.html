@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>When Did You Last…?</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F0F4FF;--white:#FFFFFF;--navy:#1B2A4A;--gray:#8899BB;
+  --shadow:0 6px 24px rgba(27,42,74,.10);--shadow-lg:0 12px 40px rgba(27,42,74,.16);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);min-height:100vh;overflow-x:hidden;}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#1B2A4A,#2E4080);padding:26px 20px 20px;
+  text-align:center;position:relative;overflow:hidden;}
+header::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 20% 50%,rgba(74,144,217,.18) 0%,transparent 60%),
+             radial-gradient(circle at 80% 30%,rgba(165,94,234,.15) 0%,transparent 50%);}
+header h1{font-family:'Baloo 2',cursive;font-size:clamp(1.5rem,4vw,2.4rem);color:#fff;
+  position:relative;text-shadow:0 2px 12px rgba(0,0,0,.3);}
+header h1 span{color:#FDCB6E;}
+header p{color:rgba(255,255,255,.72);font-size:.88rem;margin-top:4px;position:relative;}
+.dot-row{display:flex;justify-content:center;gap:8px;margin-top:11px;position:relative;}
+.dot{width:9px;height:9px;border-radius:50%;animation:pulse 2s ease-in-out infinite;}
+.dot:nth-child(1){background:#FF6B6B;animation-delay:0s;}.dot:nth-child(2){background:#FF9F43;animation-delay:.2s;}
+.dot:nth-child(3){background:#26de81;animation-delay:.4s;}.dot:nth-child(4){background:#4A90D9;animation-delay:.6s;}
+.dot:nth-child(5){background:#A55EEA;animation-delay:.8s;}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.7;}50%{transform:scale(1.4);opacity:1;}}
+
+/* TOGGLE BAR */
+.global-bar{background:var(--white);border-bottom:2px solid #E8EAF6;padding:9px 16px;
+  display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
+  position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(27,42,74,.08);}
+.tg{display:flex;align-items:center;gap:7px;}
+.tg-lbl{font-family:'Baloo 2',cursive;font-size:.82rem;color:var(--navy);font-weight:700;}
+.sw{position:relative;width:44px;height:23px;cursor:pointer;display:inline-block;}
+.sw input{opacity:0;width:0;height:0;position:absolute;}
+.sw-track{position:absolute;inset:0;background:#cdd5e0;border-radius:50px;transition:.25s;}
+.sw input:checked + .sw-track{background:#4A90D9;}
+.sw-thumb{position:absolute;left:3px;top:2.5px;width:18px;height:18px;border-radius:50%;
+  background:#fff;transition:.25s;box-shadow:0 1px 4px rgba(0,0,0,.2);pointer-events:none;}
+.sw input:checked ~ .sw-thumb{left:23px;}
+.tog-div{width:1px;height:22px;background:#E0E4F0;}
+
+main{max-width:1000px;margin:0 auto;padding:18px 14px 60px;}
+
+/* CAT NAV */
+.cat-nav{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-bottom:20px;}
+.cat-btn{font-family:'Baloo 2',cursive;font-size:.8rem;padding:6px 13px;border:none;
+  border-radius:50px;cursor:pointer;transition:all .22s;background:var(--white);color:var(--navy);
+  box-shadow:0 3px 10px rgba(0,0,0,.08);}
+.cat-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.14);}
+.cat-btn.active{color:#fff;transform:translateY(-3px);box-shadow:0 6px 18px rgba(0,0,0,.2);}
+
+.section{display:none;animation:fadeUp .35s ease;}
+.section.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+.sec-header{border-radius:18px;padding:16px 20px;margin-bottom:16px;color:#fff;
+  display:flex;align-items:center;gap:14px;box-shadow:var(--shadow-lg);}
+.sec-header .be{font-size:2.4rem;line-height:1;}
+.sec-header h2{font-family:'Baloo 2',cursive;font-size:1.3rem;margin-bottom:1px;}
+.sec-header p{font-size:.83rem;opacity:.88;}
+
+.prog-wrap{background:var(--white);border-radius:14px;padding:12px 18px;margin-bottom:16px;
+  box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;}
+.prog-wrap span{font-family:'Baloo 2',cursive;font-size:.88rem;color:var(--navy);white-space:nowrap;}
+.bar-track{flex:1;height:11px;background:#EEF0F8;border-radius:50px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:50px;transition:width .5s;background:linear-gradient(90deg,#26de81,#4A90D9);}
+
+/* CARDS */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:13px;}
+.verb-card{background:var(--white);border-radius:18px;padding:16px;box-shadow:var(--shadow);
+  border-left:5px solid;transition:transform .2s,box-shadow .2s;cursor:pointer;}
+.verb-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);}
+.verb-card .back{display:none;}
+.verb-card.flipped .front{display:none;}
+.verb-card.flipped .back{display:block;}
+
+.verb-tag{display:inline-block;font-size:.73rem;font-weight:800;padding:2px 10px;
+  border-radius:50px;margin-bottom:8px;color:#fff;}
+.v-phrase{font-family:'Baloo 2',cursive;font-size:.96rem;color:var(--navy);
+  line-height:1.35;margin-bottom:10px;}
+
+/* VFP */
+.vfp{border-radius:11px;padding:9px 11px;margin-bottom:10px;
+  background:linear-gradient(135deg,rgba(27,42,74,.04),rgba(74,144,217,.04));
+  border:1.5px solid #E0E8FF;}
+.vfp-title{font-size:.69rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--gray);margin-bottom:6px;}
+.vfp-row{display:flex;gap:5px;}
+.vfp-item{flex:1;text-align:center;background:var(--white);border-radius:8px;
+  padding:5px 5px;border:1.5px solid #E8EAF6;}
+.vfp-form{font-family:'Baloo 2',cursive;font-size:.82rem;font-weight:700;color:var(--navy);}
+.vfp-ipa{font-size:.68rem;color:#6C5CE7;margin-top:1px;font-family:monospace;}
+.vfp-lbl{font-size:.64rem;color:var(--gray);margin-top:2px;font-weight:700;text-transform:uppercase;}
+
+/* ── INLINE LINE ITEM ── */
+/* Each "line" = a row with 🔊 button + text */
+.line{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;}
+.line-content{flex:1;}
+.line-label{font-size:.7rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+  margin-bottom:2px;}
+.line-en{font-size:.9rem;color:var(--navy);line-height:1.5;font-weight:600;}
+.line-vi{font-size:.79rem;color:var(--gray);font-style:italic;margin-top:1px;font-weight:600;}
+
+/* ── INLINE PLAY BUTTON ── */
+.iplay{
+  flex-shrink:0;
+  width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;transition:all .18s;
+  box-shadow:0 2px 8px rgba(0,0,0,.14);
+  margin-top:2px;
+}
+.iplay:active{transform:scale(.93);}
+.iplay.playing{animation:ripple .7s ease-in-out infinite alternate;}
+@keyframes ripple{from{box-shadow:0 2px 8px rgba(0,0,0,.14);}to{box-shadow:0 4px 18px rgba(0,0,0,.3);}}
+/* colour variants */
+.iplay-q  {background:#1B2A4A;color:#FDCB6E;}
+.iplay-yes{background:#26de81;color:#fff;}
+.iplay-no {background:#FF6B6B;color:#fff;}
+.iplay-fol{background:#4A90D9;color:#fff;}
+
+/* Q block on card front */
+.q-block{border-radius:12px;padding:10px 12px;margin-bottom:8px;}
+
+/* answer block background tints */
+.ans-yes-bg{background:#E8FFF3;border-left:3px solid #26de81;border-radius:0 10px 10px 0;padding:2px 8px 2px 0;}
+.ans-no-bg {background:#FFF0F0;border-left:3px solid #FF6B6B;border-radius:0 10px 10px 0;padding:2px 8px 2px 0;}
+.ans-fol-bg{background:#EAF3FF;border-left:3px solid #4A90D9;border-radius:0 10px 10px 0;padding:2px 8px 2px 0;}
+
+.tap-hint{font-size:.74rem;color:var(--gray);text-align:right;margin-top:6px;font-style:italic;}
+.back-title{font-family:'Baloo 2',cursive;font-size:.9rem;margin-bottom:10px;}
+
+/* ── RECORDER PANEL ── */
+.rec-panel{
+  margin-top:12px;border-top:1.5px dashed #E0E8FF;padding-top:11px;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.rec-btn{
+  display:inline-flex;align-items:center;gap:5px;font-family:'Baloo 2',cursive;
+  font-size:.78rem;font-weight:700;padding:7px 14px;border:none;border-radius:50px;
+  cursor:pointer;transition:all .2s;box-shadow:0 2px 10px rgba(0,0,0,.12);
+  white-space:nowrap;
+}
+.rec-btn:active{transform:scale(.95);}
+.rec-start{background:#E84393;color:#fff;}
+.rec-start.recording{background:#c0002f;animation:recPulse .8s ease-in-out infinite alternate;}
+@keyframes recPulse{from{box-shadow:0 2px 10px rgba(232,67,147,.3);}to{box-shadow:0 4px 22px rgba(232,67,147,.7);}}
+.rec-play{background:#6C5CE7;color:#fff;}
+.rec-play.playing{background:#4A90D9;}
+.rec-timer{font-family:'Baloo 2',cursive;font-size:.8rem;color:#E84393;font-weight:700;min-width:36px;}
+.rec-hint{font-size:.73rem;color:var(--gray);font-style:italic;width:100%;}
+
+/* ── ALL GRID ── */
+.all-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:11px;margin-bottom:20px;}
+.all-card{border-radius:16px;padding:16px 10px;text-align:center;cursor:pointer;transition:all .22s;
+  box-shadow:var(--shadow);color:#fff;}
+.all-card:hover{transform:translateY(-4px) scale(1.03);box-shadow:var(--shadow-lg);}
+.all-card .ae{font-size:1.9rem;margin-bottom:6px;}
+.all-card .an{font-family:'Baloo 2',cursive;font-size:.92rem;font-weight:700;}
+.all-card .ac{font-size:.76rem;opacity:.85;margin-top:2px;}
+
+/* ── RANDOM ── */
+.rand-box{background:linear-gradient(135deg,#1B2A4A,#2E4080);border-radius:22px;padding:26px;
+  text-align:center;color:#fff;box-shadow:var(--shadow-lg);margin-bottom:18px;}
+.rq{font-family:'Baloo 2',cursive;font-size:clamp(1.1rem,3vw,1.55rem);margin:12px 0 4px;
+  line-height:1.4;color:#FDCB6E;}
+.rq-vi{font-size:.88rem;color:rgba(255,255,255,.58);font-style:italic;margin-bottom:10px;}
+.rtag{display:inline-block;padding:3px 12px;border-radius:50px;font-size:.76rem;font-weight:700;margin-bottom:10px;}
+.rand-btn{font-family:'Baloo 2',cursive;font-size:.98rem;padding:11px 26px;border:none;border-radius:50px;
+  background:linear-gradient(135deg,#FDCB6E,#FF9F43);color:var(--navy);cursor:pointer;font-weight:700;
+  box-shadow:0 6px 20px rgba(253,203,110,.4);transition:all .2s;margin-top:6px;}
+.rand-btn:hover{transform:translateY(-2px) scale(1.03);}
+.rand-btn.reveal{background:linear-gradient(135deg,#26de81,#4A90D9);color:#fff;margin-left:8px;}
+
+/* random lines */
+.rnd-lines{text-align:left;margin-top:14px;}
+.rnd-line{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;}
+.rnd-line-content{flex:1;}
+.rnd-line-en{font-size:.92rem;line-height:1.5;color:#fff;}
+.rnd-line-vi{font-size:.8rem;color:rgba(255,255,255,.55);font-style:italic;margin-top:1px;}
+.rnd-line-lbl{font-size:.7rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+  color:#FDCB6E;margin-bottom:2px;}
+
+.rnd-answers{display:none;animation:fadeUp .3s ease;}
+.rnd-answers.show{display:block;}
+.rnd-ans-card{background:rgba(255,255,255,.1);border-radius:12px;padding:12px 14px;margin-bottom:7px;}
+
+/* random iplay variants for dark bg */
+.iplay-rq  {background:#FDCB6E;color:#1B2A4A;}
+.iplay-ryes{background:#26de81;color:#fff;}
+.iplay-rno {background:#FF6B6B;color:#fff;}
+.iplay-rfol{background:#4A90D9;color:#fff;}
+
+/* random recorder */
+.rnd-rec-panel{
+  margin-top:14px;border-top:1.5px dashed rgba(255,255,255,.2);padding-top:12px;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;
+}
+.rnd-rec-hint{font-size:.73rem;color:rgba(255,255,255,.5);font-style:italic;width:100%;text-align:center;}
+
+/* rnd vfp */
+.rnd-vfp{background:rgba(255,255,255,.08);border-radius:11px;padding:10px 11px;margin-top:12px;text-align:left;}
+.rnd-vfp .vfp-title{color:rgba(255,255,255,.5);}
+.rnd-vfp .vfp-item{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.12);}
+.rnd-vfp .vfp-form{color:#FDCB6E;}
+.rnd-vfp .vfp-ipa{color:rgba(255,255,255,.65);}
+.rnd-vfp .vfp-lbl{color:rgba(255,255,255,.45);}
+
+@media(max-width:480px){
+  .cards-grid{grid-template-columns:1fr;}
+  .all-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⏰ When did you <span>last</span>…?</h1>
+  <p>A2 · Thẻ lật · 🔊 Nghe từng câu · 🎙️ Ghi âm & so sánh · 📖 IPA</p>
+  <div class="dot-row">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot"></div><div class="dot"></div>
+  </div>
+</header>
+
+<div class="global-bar">
+  <div class="tg">
+    <span class="tg-lbl">🇻🇳 Tiếng Việt</span>
+    <label class="sw"><input type="checkbox" id="tog-vi" checked><div class="sw-track"></div><div class="sw-thumb"></div></label>
+  </div>
+  <div class="tog-div"></div>
+  <div class="tg">
+    <span class="tg-lbl">📖 Chia động từ</span>
+    <label class="sw"><input type="checkbox" id="tog-vf" checked><div class="sw-track"></div><div class="sw-thumb"></div></label>
+  </div>
+</div>
+
+<main>
+  <nav class="cat-nav" id="cat-nav"></nav>
+  <div class="prog-wrap" id="prog-wrap" style="display:none">
+    <span id="prog-lbl">0 / 0 đã xem</span>
+    <div class="bar-track"><div class="bar-fill" id="bar-fill" style="width:0%"></div></div>
+    <span id="prog-pct">0%</span>
+  </div>
+  <div id="sections-root"></div>
+</main>
+
+<script>
+// ══════════════════════════════════
+// VERB DICTIONARY
+// ══════════════════════════════════
+const VD={
+  wash:     {v1:"wash",     i1:"/wɒʃ/",       v2:"washed",    i2:"/wɒʃt/",       v3:"washed",     i3:"/wɒʃt/"},
+  cut:      {v1:"cut",      i1:"/kʌt/",        v2:"cut",       i2:"/kʌt/",         v3:"cut",        i3:"/kʌt/"},
+  prepare:  {v1:"prepare",  i1:"/prɪˈpeə/",    v2:"prepared",  i2:"/prɪˈpeəd/",    v3:"prepared",   i3:"/prɪˈpeəd/"},
+  put:      {v1:"put",      i1:"/pʊt/",        v2:"put",       i2:"/pʊt/",         v3:"put",        i3:"/pʊt/"},
+  go:       {v1:"go",       i1:"/ɡəʊ/",        v2:"went",      i2:"/went/",        v3:"gone",       i3:"/ɡɒn/"},
+  water:    {v1:"water",    i1:"/ˈwɔːtə/",     v2:"watered",   i2:"/ˈwɔːtəd/",     v3:"watered",    i3:"/ˈwɔːtəd/"},
+  wear:     {v1:"wear",     i1:"/weə/",        v2:"wore",      i2:"/wɔː/",         v3:"worn",       i3:"/wɔːn/"},
+  get:      {v1:"get",      i1:"/ɡet/",        v2:"got",       i2:"/ɡɒt/",         v3:"got/gotten", i3:"/ɡɒt/"},
+  eat:      {v1:"eat",      i1:"/iːt/",        v2:"ate",       i2:"/et/",          v3:"eaten",      i3:"/ˈiːtn/"},
+  drink:    {v1:"drink",    i1:"/drɪŋk/",      v2:"drank",     i2:"/dræŋk/",       v3:"drunk",      i3:"/drʌŋk/"},
+  rest:     {v1:"rest",     i1:"/rest/",       v2:"rested",    i2:"/ˈrestɪd/",     v3:"rested",     i3:"/ˈrestɪd/"},
+  stretch:  {v1:"stretch",  i1:"/stretʃ/",     v2:"stretched", i2:"/stretʃt/",     v3:"stretched",  i3:"/stretʃt/"},
+  feel:     {v1:"feel",     i1:"/fiːl/",       v2:"felt",      i2:"/felt/",        v3:"felt",       i3:"/felt/"},
+  start:    {v1:"start",    i1:"/stɑːt/",      v2:"started",   i2:"/ˈstɑːtɪd/",   v3:"started",    i3:"/ˈstɑːtɪd/"},
+  use:      {v1:"use",      i1:"/juːz/",       v2:"used",      i2:"/juːzd/",       v3:"used",       i3:"/juːzd/"},
+  choose:   {v1:"choose",   i1:"/tʃuːz/",      v2:"chose",     i2:"/tʃəʊz/",      v3:"chosen",     i3:"/ˈtʃəʊzn/"},
+  compare:  {v1:"compare",  i1:"/kəmˈpeə/",    v2:"compared",  i2:"/kəmˈpeəd/",   v3:"compared",   i3:"/kəmˈpeəd/"},
+  visit:    {v1:"visit",    i1:"/ˈvɪzɪt/",     v2:"visited",   i2:"/ˈvɪzɪtɪd/",   v3:"visited",    i3:"/ˈvɪzɪtɪd/"},
+  pick:     {v1:"pick",     i1:"/pɪk/",        v2:"picked",    i2:"/pɪkt/",        v3:"picked",     i3:"/pɪkt/"},
+  weed:     {v1:"weed",     i1:"/wiːd/",       v2:"weeded",    i2:"/ˈwiːdɪd/",    v3:"weeded",     i3:"/ˈwiːdɪd/"},
+  grow:     {v1:"grow",     i1:"/ɡrəʊ/",       v2:"grew",      i2:"/ɡruː/",        v3:"grown",      i3:"/ɡrəʊn/"},
+  catch:    {v1:"catch",    i1:"/kætʃ/",       v2:"caught",    i2:"/kɔːt/",        v3:"caught",     i3:"/kɔːt/"},
+  climb:    {v1:"climb",    i1:"/klaɪm/",      v2:"climbed",   i2:"/klaɪmd/",      v3:"climbed",    i3:"/klaɪmd/"},
+  hide:     {v1:"hide",     i1:"/haɪd/",       v2:"hid",       i2:"/hɪd/",         v3:"hidden",     i3:"/ˈhɪdn/"},
+  watch:    {v1:"watch",    i1:"/wɒtʃ/",       v2:"watched",   i2:"/wɒtʃt/",       v3:"watched",    i3:"/wɒtʃt/"},
+  text:     {v1:"text",     i1:"/tekst/",      v2:"texted",    i2:"/ˈtekstɪd/",   v3:"texted",     i3:"/ˈtekstɪd/"},
+  listen:   {v1:"listen",   i1:"/ˈlɪsn/",      v2:"listened",  i2:"/ˈlɪsnd/",     v3:"listened",   i3:"/ˈlɪsnd/"},
+  dance:    {v1:"dance",    i1:"/dɑːns/",      v2:"danced",    i2:"/dɑːnst/",      v3:"danced",     i3:"/dɑːnst/"},
+  park:     {v1:"park",     i1:"/pɑːk/",       v2:"parked",    i2:"/pɑːkt/",       v3:"parked",     i3:"/pɑːkt/"},
+  pedal:    {v1:"pedal",    i1:"/ˈpedl/",      v2:"pedalled",  i2:"/ˈpedld/",      v3:"pedalled",   i3:"/ˈpedld/"},
+  coast:    {v1:"coast",    i1:"/kəʊst/",      v2:"coasted",   i2:"/ˈkəʊstɪd/",   v3:"coasted",    i3:"/ˈkəʊstɪd/"},
+  take:     {v1:"take",     i1:"/teɪk/",       v2:"took",      i2:"/tʊk/",         v3:"taken",      i3:"/ˈteɪkən/"},
+  swim:     {v1:"swim",     i1:"/swɪm/",       v2:"swam",      i2:"/swæm/",        v3:"swum",       i3:"/swʌm/"},
+  celebrate:{v1:"celebrate",i1:"/ˈselɪbreɪt/",v2:"celebrated",i2:"/ˈselɪbreɪtɪd/",v3:"celebrated",i3:"/ˈselɪbreɪtɪd/"},
+  stay:     {v1:"stay",     i1:"/steɪ/",       v2:"stayed",    i2:"/steɪd/",       v3:"stayed",     i3:"/steɪd/"},
+  laugh:    {v1:"laugh",    i1:"/lɑːf/",       v2:"laughed",   i2:"/lɑːft/",       v3:"laughed",    i3:"/lɑːft/"},
+  carry:    {v1:"carry",    i1:"/ˈkæri/",      v2:"carried",   i2:"/ˈkærid/",      v3:"carried",    i3:"/ˈkærid/"},
+  see:      {v1:"see",      i1:"/siː/",        v2:"saw",       i2:"/sɔː/",         v3:"seen",       i3:"/siːn/"},
+  smell:    {v1:"smell",    i1:"/smel/",       v2:"smelled",   i2:"/smeld/",       v3:"smelled",    i3:"/smeld/"},
+  taste:    {v1:"taste",    i1:"/teɪst/",      v2:"tasted",    i2:"/ˈteɪstɪd/",   v3:"tasted",     i3:"/ˈteɪstɪd/"},
+  look:     {v1:"look",     i1:"/lʊk/",        v2:"looked",    i2:"/lʊkt/",        v3:"looked",     i3:"/lʊkt/"},
+  wiggle:   {v1:"wiggle",   i1:"/ˈwɪɡl/",      v2:"wiggled",   i2:"/ˈwɪɡld/",      v3:"wiggled",    i3:"/ˈwɪɡld/"},
+  cover:    {v1:"cover",    i1:"/ˈkʌvə/",      v2:"covered",   i2:"/ˈkʌvəd/",      v3:"covered",    i3:"/ˈkʌvəd/"},
+  win:      {v1:"win",      i1:"/wɪn/",        v2:"won",       i2:"/wʌn/",         v3:"won",        i3:"/wʌn/"},
+  lose:     {v1:"lose",     i1:"/luːz/",       v2:"lost",      i2:"/lɒst/",        v3:"lost",       i3:"/lɒst/"},
+  help:     {v1:"help",     i1:"/help/",       v2:"helped",    i2:"/helpt/",       v3:"helped",     i3:"/helpt/"},
+  hold:     {v1:"hold",     i1:"/həʊld/",      v2:"held",      i2:"/held/",        v3:"held",       i3:"/held/"},
+  hug:      {v1:"hug",      i1:"/hʌɡ/",        v2:"hugged",    i2:"/hʌɡd/",        v3:"hugged",     i3:"/hʌɡd/"},
+  feed:     {v1:"feed",     i1:"/fiːd/",       v2:"fed",       i2:"/fed/",         v3:"fed",        i3:"/fed/"},
+  protect:  {v1:"protect",  i1:"/prəˈtekt/",   v2:"protected", i2:"/prəˈtektɪd/",  v3:"protected",  i3:"/prəˈtektɪd/"},
+  teach:    {v1:"teach",    i1:"/tiːtʃ/",      v2:"taught",    i2:"/tɔːt/",        v3:"taught",     i3:"/tɔːt/"},
+  care:     {v1:"take care",i1:"/teɪk keə/",   v2:"took care", i2:"/tʊk keə/",    v3:"taken care", i3:"/ˈteɪkən keə/"},
+  give:     {v1:"give",     i1:"/ɡɪv/",        v2:"gave",      i2:"/ɡeɪv/",        v3:"given",      i3:"/ˈɡɪvn/"},
+};
+
+// ══════════════════════════════════
+// DATA
+// ══════════════════════════════════
+const AB='https://raw.githubusercontent.com/klamts/when_did_you_last_audio/main/';
+const CATS=[
+  {id:"all",    label:"🌟 Tất cả",     color:"#1B2A4A",emoji:"🌟",verbs:[]},
+  {id:"random", label:"🎲 Ngẫu nhiên", color:"#6C5CE7",emoji:"🎲",verbs:[]},
+  {id:"daily",  label:"🏠 Việc nhà",   color:"#FF6B6B",light:"#FFF0F0",emoji:"🏠",desc:"Công việc & thói quen hằng ngày",verbs:[
+    {core:"wash",   phrase:"wash the clothes",            vi:"giặt quần áo",          emoji:"👕",audio:{q:"1.wav",yes:"2.wav",no:"3.wav",f:"4.wav"},scripts:{q:"When did you last wash the clothes?",yes:"I washed the clothes this morning.",no:"I didn't wash them today — maybe tomorrow!",f:"How often do you wash your clothes?"},vi_s:{q:"Lần cuối bạn giặt quần áo là khi nào?",yes:"Tôi đã giặt đồ sáng nay.",no:"Hôm nay tôi chưa giặt - chắc là mai thôi!",f:"Bạn có thường xuyên giặt đồ không?"}},
+    {core:"cut",    phrase:"wash and cut the vegetables", vi:"rửa và cắt rau",         emoji:"🥦",audio:{q:"5.wav",yes:"6.wav",no:"7.wav",f:"8.wav"},scripts:{q:"When did you last wash and cut the vegetables?",yes:"I washed and cut the vegetables before dinner.",no:"I haven't done that yet today.",f:"Who usually cuts the vegetables in your family?"},vi_s:{q:"Lần cuối bạn rửa và cắt rau là khi nào?",yes:"Tôi đã rửa và cắt rau trước bữa tối.",no:"Tôi chưa làm việc đó trong hôm nay.",f:"Ai là người thường cắt rau trong nhà bạn?"}},
+    {core:"prepare",phrase:"prepare a meal",              vi:"chuẩn bị bữa ăn",        emoji:"🍳",audio:{q:"9.wav",yes:"10.wav",no:"11.wav",f:"12.wav"},scripts:{q:"When did you last prepare a meal?",yes:"I prepared breakfast this morning.",no:"I didn't prepare it — my mom did!",f:"What did you prepare?"},vi_s:{q:"Lần cuối bạn chuẩn bị bữa ăn là khi nào?",yes:"Tôi đã chuẩn bị bữa sáng sáng nay.",no:"Tôi không làm - mẹ tôi làm đấy!",f:"Bạn đã chuẩn bị món gì vậy?"}},
+    {core:"put",    phrase:"put away your things",        vi:"cất đồ vào chỗ",         emoji:"🗂️",audio:{q:"13.wav",yes:"14.wav",no:"15.wav",f:"16.wav"},scripts:{q:"When did you last put away your things?",yes:"I put away my toys before bedtime.",no:"I haven't put them away yet!",f:"Where do you usually put them?"},vi_s:{q:"Lần cuối bạn cất đồ ngăn nắp là khi nào?",yes:"Tôi đã cất đồ chơi trước khi đi ngủ.",no:"Tôi vẫn chưa cất chúng!",f:"Bạn thường cất chúng ở đâu?"}},
+    {core:"go",     phrase:"go to bed early",             vi:"đi ngủ sớm",             emoji:"🌙",audio:{q:"17.wav",yes:"18.wav",no:"19.wav",f:"20.wav"},scripts:{q:"When did you last go to bed early?",yes:"I went to bed early last Sunday.",no:"I stayed up late last night!",f:"What time did you go to bed?"},vi_s:{q:"Lần cuối bạn đi ngủ sớm là khi nào?",yes:"Tôi đã ngủ sớm tối Chủ Nhật tuần trước.",no:"Tối qua tôi đã thức khuya!",f:"Lúc đó bạn đi ngủ mấy giờ?"}},
+    {core:"water",  phrase:"water the plants",            vi:"tưới cây",               emoji:"🌱",audio:{q:"21.wav",yes:"22.wav",no:"23.wav",f:"24.wav"},scripts:{q:"When did you last water the plants?",yes:"I watered them this morning.",no:"Oh no — I forgot!",f:"How often do you water your plants?"},vi_s:{q:"Lần cuối bạn tưới cây là khi nào?",yes:"Tôi đã tưới cây sáng nay.",no:"Ôi không - tôi quên mất tiêu!",f:"Bạn thường tưới cây bao lâu một lần?"}},
+    {core:"wear",   phrase:"wear a uniform",              vi:"mặc đồng phục",           emoji:"👔",audio:{q:"25.wav",yes:"26.wav",no:"27.wav",f:"28.wav"},scripts:{q:"When did you last wear a uniform?",yes:"I wore my uniform yesterday at school.",no:"We don't wear uniforms on Saturdays.",f:"Do you like wearing a uniform?"},vi_s:{q:"Lần cuối bạn mặc đồng phục là khi nào?",yes:"Hôm qua đi học tôi có mặc.",no:"Thứ Bảy chúng tôi không mặc đồng phục.",f:"Bạn có thích mặc đồng phục không?"}},
+  ]},
+  {id:"health", label:"💪 Sức khoẻ",   color:"#26de81",light:"#E8FFF3",emoji:"💪",desc:"Sức khoẻ thể chất & tinh thần",verbs:[
+    {core:"get",    phrase:"get enough sleep",            vi:"ngủ đủ giấc",            emoji:"😴",audio:{q:"1.wav",yes:"2.wav",no:"3.wav",f:"4.wav"},scripts:{q:"When did you last get enough sleep?",yes:"I got enough sleep last night — nine hours!",no:"I didn't sleep well last night.",f:"How many hours of sleep did you get?"},vi_s:{q:"Lần cuối bạn ngủ đủ giấc là khi nào?",yes:"Tối qua tôi ngủ đủ 9 tiếng luôn!",no:"Tối qua tôi ngủ không ngon giấc.",f:"Bạn đã ngủ được mấy tiếng?"}},
+    {core:"get",    phrase:"get exercise",                vi:"tập thể dục",            emoji:"🏃",audio:{q:"5.wav",yes:"6.wav",no:"7.wav",f:"8.wav"},scripts:{q:"When did you last get exercise?",yes:"I exercised yesterday — I went running.",no:"I haven't exercised this week yet.",f:"What kind of exercise did you do?"},vi_s:{q:"Lần cuối bạn tập thể dục là khi nào?",yes:"Hôm qua tôi có chạy bộ.",no:"Tuần này tôi vẫn chưa tập.",f:"Bạn đã tập bài gì vậy?"}},
+    {core:"eat",    phrase:"eat a healthy snack",         vi:"ăn đồ nhẹ lành mạnh",    emoji:"🍎",audio:{q:"9.wav",yes:"10.wav",no:"11.wav",f:"12.wav"},scripts:{q:"When did you last eat a healthy snack?",yes:"I ate an apple after school.",no:"I had chips instead — oops!",f:"What healthy snack do you like?"},vi_s:{q:"Lần cuối bạn ăn quà vặt lành mạnh là khi nào?",yes:"Tôi đã ăn một quả táo sau giờ học.",no:"Tôi lại ăn khoai tây chiên mất rồi.",f:"Bạn thích món ăn nhẹ lành mạnh nào?"}},
+    {core:"eat",    phrase:"eat eight servings of fruit", vi:"ăn 8 phần trái cây",      emoji:"🍇",audio:{q:"13.wav",yes:"14.wav",no:"15.wav",f:"16.wav"},scripts:{q:"When did you last eat eight servings of fruit?",yes:"I ate lots of fruit last weekend.",no:"That's a lot! I only ate two servings.",f:"What is your favourite fruit?"},vi_s:{q:"Lần cuối bạn ăn đủ 8 phần trái cây là khi nào?",yes:"Cuối tuần trước tôi ăn rất nhiều.",no:"Nhiều quá! Tôi mới ăn có 2 phần thôi.",f:"Loại trái cây yêu thích của bạn là gì?"}},
+    {core:"drink",  phrase:"drink a big glass of water",  vi:"uống ly nước to",         emoji:"💧",audio:{q:"17.wav",yes:"18.wav",no:"19.wav",f:"20.wav"},scripts:{q:"When did you last drink a big glass of water?",yes:"I drank a big glass right after waking up.",no:"I keep forgetting to drink enough water!",f:"How many glasses of water do you drink per day?"},vi_s:{q:"Lần cuối bạn uống một ly nước thật to là khi nào?",yes:"Tôi uống một ly ngay sau khi ngủ dậy.",no:"Tôi cứ hay quên uống đủ nước.",f:"Mỗi ngày bạn uống bao nhiêu ly nước?"}},
+    {core:"eat",    phrase:"eat junk food",               vi:"ăn đồ ăn vặt",            emoji:"🍟",audio:{q:"21.wav",yes:"22.wav",no:"23.wav",f:"24.wav"},scripts:{q:"When did you last eat junk food?",yes:"I had some chips yesterday.",no:"I've been eating healthy this week!",f:"What junk food do you like most?"},vi_s:{q:"Lần cuối bạn ăn đồ ăn vặt là khi nào?",yes:"Hôm qua tôi có ăn khoai tây chiên.",no:"Tuần này tôi ăn uống rất lành mạnh.",f:"Bạn thích món ăn vặt nào nhất?"}},
+    {core:"get",    phrase:"get rest",                    vi:"nghỉ ngơi",              emoji:"🛋️",audio:{q:"25.wav",yes:"26.wav",no:"27.wav",f:"28.wav"},scripts:{q:"When did you last get rest?",yes:"I rested all afternoon on Sunday.",no:"I've been really busy this week!",f:"What do you do when you rest?"},vi_s:{q:"Lần cuối bạn được nghỉ ngơi là khi nào?",yes:"Chiều Chủ Nhật tôi đã nghỉ ngơi cả buổi.",no:"Tuần này tôi bận túi bụi.",f:"Khi nghỉ ngơi bạn thường làm gì?"}},
+    {core:"stretch",phrase:"stretch your muscles",        vi:"giãn cơ",                emoji:"🤸",audio:{q:"29.wav",yes:"30.wav",no:"31.wav",f:"32.wav"},scripts:{q:"When did you last stretch your muscles?",yes:"I stretched before PE class.",no:"I should stretch more often!",f:"Which muscles did you stretch?"},vi_s:{q:"Lần cuối bạn tập giãn cơ là khi nào?",yes:"Tôi giãn cơ trước giờ thể dục.",no:"Đáng lẽ tôi nên tập giãn cơ thường xuyên hơn.",f:"Bạn đã giãn nhóm cơ nào thế?"}},
+    {core:"feel",   phrase:"feel happy",                  vi:"cảm thấy vui",           emoji:"😊",audio:{q:"33.wav",yes:"34.wav",no:"35.wav",f:"36.wav"},scripts:{q:"When did you last feel happy?",yes:"I felt really happy yesterday when I won a game!",no:"I felt a bit tired, not very happy.",f:"What made you feel happy?"},vi_s:{q:"Lần cuối bạn cảm thấy thật sự hạnh phúc là khi nào?",yes:"Hôm qua thắng trận game tôi vui cực kỳ!",no:"Tôi hơi mệt nên cũng không vui lắm.",f:"Điều gì đã khiến bạn vui vậy?"}},
+  ]},
+  {id:"school", label:"📚 Học tập",    color:"#4A90D9",light:"#EAF3FF",emoji:"📚",desc:"Học tập & trường lớp",verbs:[
+    {core:"start",  phrase:"start a new book",            vi:"bắt đầu đọc sách mới",   emoji:"📖",audio:{q:"1.wav",yes:"2.wav",no:"3.wav",f:"4.wav"},scripts:{q:"When did you last start a new book?",yes:"I started a new book last Monday.",no:"I'm still reading my current one.",f:"What book did you start?"},vi_s:{q:"Lần cuối bạn bắt đầu một cuốn sách mới là khi nào?",yes:"Tôi bắt đầu một cuốn sách mới vào thứ Hai tuần trước.",no:"Tôi vẫn đang đọc cuốn hiện tại.",f:"Bạn đã bắt đầu cuốn sách nào?"}},
+    {core:"use",    phrase:"use colorful paper",          vi:"dùng giấy màu",          emoji:"🎨",audio:{q:"5.wav",yes:"6.wav",no:"7.wav",f:"8.wav"},scripts:{q:"When did you last use colorful paper?",yes:"I used colorful paper in art class.",no:"I haven't done any crafts recently.",f:"What did you make with the paper?"},vi_s:{q:"Lần cuối bạn dùng giấy màu là khi nào?",yes:"Tôi dùng giấy màu trong giờ mỹ thuật.",no:"Gần đây tôi chưa làm đồ thủ công.",f:"Bạn đã làm gì với giấy đó?"}},
+    {core:"choose", phrase:"choose a book",               vi:"chọn một cuốn sách",      emoji:"📚",audio:{q:"9.wav",yes:"10.wav",no:"11.wav",f:"12.wav"},scripts:{q:"When did you last choose a book?",yes:"I chose a new book at the library on Saturday.",no:"I've been reading the same book.",f:"How did you choose it?"},vi_s:{q:"Lần cuối bạn chọn một cuốn sách là khi nào?",yes:"Tôi chọn một cuốn sách mới ở thư viện thứ Bảy.",no:"Tôi vẫn đang đọc cuốn cũ.",f:"Bạn đã chọn nó như thế nào?"}},
+    {core:"compare",phrase:"compare two things",          vi:"so sánh hai thứ",         emoji:"⚖️",audio:{q:"13.wav",yes:"14.wav",no:"15.wav",f:"16.wav"},scripts:{q:"When did you last compare two things?",yes:"I compared two phones in class.",no:"I can't remember the last time!",f:"What did you compare?"},vi_s:{q:"Lần cuối bạn so sánh hai thứ là khi nào?",yes:"Tôi so sánh hai chiếc điện thoại trong lớp.",no:"Tôi không nhớ lần cuối là khi nào.",f:"Bạn đã so sánh những gì?"}},
+    {core:"prepare",phrase:"prepare for a test",          vi:"chuẩn bị cho bài kiểm tra",emoji:"📝",audio:{q:"17.wav",yes:"18.wav",no:"19.wav",f:"20.wav"},scripts:{q:"When did you last prepare for a test?",yes:"I prepared for my English test last night.",no:"I need to start preparing!",f:"What subject was the test?"},vi_s:{q:"Lần cuối bạn chuẩn bị cho bài kiểm tra là khi nào?",yes:"Tối qua tôi chuẩn bị cho bài kiểm tra tiếng Anh.",no:"Tôi cần bắt đầu chuẩn bị.",f:"Đó là bài kiểm tra môn gì?"}},
+    {core:"visit",  phrase:"visit a museum",              vi:"thăm bảo tàng",          emoji:"🏛️",audio:{q:"21.wav",yes:"22.wav",no:"23.wav",f:"24.wav"},scripts:{q:"When did you last visit a museum?",yes:"I visited a history museum last month.",no:"I haven't visited one recently.",f:"What was the most interesting thing there?"},vi_s:{q:"Lần cuối bạn thăm bảo tàng là khi nào?",yes:"Tôi đã thăm bảo tàng lịch sử tháng trước.",no:"Gần đây tôi chưa đi bảo tàng.",f:"Điều thú vị nhất ở đó là gì?"}},
+  ]},
+  {id:"nature", label:"🌿 Thiên nhiên",color:"#00B894",light:"#E0FFF7",emoji:"🌿",desc:"Vườn tược & thiên nhiên",verbs:[
+    {core:"pick",   phrase:"pick fruit or vegetables",    vi:"hái rau hoặc quả",       emoji:"🍅",audio:{q:"1.wav",yes:"2.wav",no:"3.wav",f:"4.wav"},scripts:{q:"When did you last pick fruit or vegetables?",yes:"I picked tomatoes from our garden last Sunday.",no:"We don't have a garden yet.",f:"What did you pick?"},vi_s:{q:"Lần cuối bạn hái rau hoặc quả là khi nào?",yes:"Tôi đã hái cà chua trong vườn nhà vào Chủ nhật tuần trước.",no:"Nhà tôi vẫn chưa có vườn.",f:"Bạn đã hái gì?"}},
+    {core:"weed",   phrase:"weed the garden",             vi:"nhổ cỏ dại",             emoji:"🌾",audio:{q:"5.wav",yes:"6.wav",no:"7.wav",f:"8.wav"},scripts:{q:"When did you last weed the garden?",yes:"I weeded for an hour last Saturday.",no:"The garden is getting a bit wild!",f:"How long did it take?"},vi_s:{q:"Lần cuối bạn nhổ cỏ dại trong vườn là khi nào?",yes:"Tôi đã nhổ cỏ trong một giờ vào thứ Bảy tuần trước.",no:"Khu vườn đang mọc cỏ khá nhiều!",f:"Việc đó mất bao lâu?"}},
+    {core:"grow",   phrase:"grow something",              vi:"trồng thứ gì đó",        emoji:"🌱",audio:{q:"9.wav",yes:"10.wav",no:"11.wav",f:"12.wav"},scripts:{q:"When did you last grow something?",yes:"I grew some herbs on the windowsill.",no:"I'd love to try growing something!",f:"What did you grow?"},vi_s:{q:"Lần cuối bạn trồng thứ gì đó là khi nào?",yes:"Tôi đã trồng vài loại rau thơm ở bệ cửa sổ.",no:"Tôi rất muốn thử trồng thứ gì đó!",f:"Bạn đã trồng gì?"}},
+    {core:"catch",  phrase:"catch a bug or animal",       vi:"bắt côn trùng hoặc động vật",emoji:"🐛",audio:{q:"13.wav",yes:"14.wav",no:"15.wav",f:"16.wav"},scripts:{q:"When did you last catch a bug or animal?",yes:"I caught a firefly last summer!",no:"I've never caught one!",f:"What did you catch?"},vi_s:{q:"Lần cuối bạn bắt côn trùng hoặc động vật là khi nào?",yes:"Tôi đã bắt được một con đom đóm vào mùa hè năm ngoái.",no:"Tôi chưa bao giờ bắt được con nào!",f:"Bạn đã bắt được con gì?"}},
+    {core:"climb",  phrase:"climb a tree",                vi:"leo cây",                emoji:"🌳",audio:{q:"17.wav",yes:"18.wav",no:"19.wav",f:"20.wav"},scripts:{q:"When did you last climb a tree?",yes:"I climbed a big mango tree last week.",no:"I haven't climbed a tree in ages!",f:"How high did you climb?"},vi_s:{q:"Lần cuối bạn leo cây là khi nào?",yes:"Tôi đã leo một cây xoài lớn vào tuần trước.",no:"Tôi đã lâu rồi chưa leo cây.",f:"Bạn đã leo cao đến mức nào?"}},
+    {core:"hide",   phrase:"hide in the grasslands",      vi:"trốn trong đồng cỏ",     emoji:"🌿",audio:{q:"21.wav",yes:"22.wav",no:"23.wav",f:"24.wav"},scripts:{q:"When did you last hide in the grasslands?",yes:"I played hide-and-seek in tall grass last weekend.",no:"That sounds fun — I'd love to try!",f:"Were you hiding or seeking?"},vi_s:{q:"Lần cuối bạn trốn trong đồng cỏ là khi nào?",yes:"Cuối tuần trước tôi chơi trốn tìm trong bãi cỏ cao.",no:"Nghe vui quá — tôi muốn thử!",f:"Bạn là người trốn hay người đi tìm?"}},
+  ]},
+  {id:"screen", label:"📱 Giải trí",   color:"#A55EEA",light:"#F5EEFF",emoji:"📱",desc:"Giải trí, màn hình & bạn bè",verbs:[
+    {core:"watch",  phrase:"watch a movie",    vi:"xem phim",           emoji:"🎬",audio:{q:"1.wav",yes:"2.wav",no:"3.wav",f:"4.wav"},scripts:{q:"When did you last watch a movie?",yes:"I watched a movie last Friday night.",no:"I haven't watched one this week.",f:"What movie did you watch?"},vi_s:{q:"Lần cuối bạn xem phim là khi nào?",yes:"Tôi đã xem một bộ phim vào tối thứ Sáu tuần trước.",no:"Tuần này tôi chưa xem phim.",f:"Bạn đã xem phim gì?"}},
+    {core:"go",     phrase:"go to the movies", vi:"đi xem phim rạp",    emoji:"🎥",audio:{q:"5.wav",yes:"6.wav",no:"7.wav",f:"8.wav"},scripts:{q:"When did you last go to the movies?",yes:"I went to the movies last Saturday!",no:"It's been a few months since I went.",f:"Which cinema did you go to?"},vi_s:{q:"Lần cuối bạn đi xem phim ở rạp là khi nào?",yes:"Tôi đã đi xem phim vào thứ Bảy tuần trước.",no:"Đã vài tháng rồi tôi chưa đi rạp.",f:"Bạn đã đến rạp nào?"}},
+    {core:"text",   phrase:"text your friends", vi:"nhắn tin cho bạn bè",emoji:"💬",audio:{q:"9.wav",yes:"10.wav",no:"11.wav",f:"12.wav"},scripts:{q:"When did you last text your friends?",yes:"I texted my friends after dinner.",no:"I called instead of texting!",f:"What did you text about?"},vi_s:{q:"Lần cuối bạn nhắn tin cho bạn bè là khi nào?",yes:"Tôi đã nhắn tin cho bạn bè sau bữa tối.",no:"Tôi đã gọi điện thay vì nhắn tin.",f:"Bạn đã nhắn tin về chuyện gì?"}},
+    {core:"listen", phrase:"listen to music",  vi:"nghe nhạc",          emoji:"🎵",audio:{q:"13.wav",yes:"14.wav",no:"15.wav",f:"16.wav"},scripts:{q:"When did you last listen to music?",yes:"I listened to music on the bus this morning.",no:"I haven't listened much lately.",f:"What kind of music do you like?"},vi_s:{q:"Lần cuối bạn nghe nhạc là khi nào?",yes:"Tôi đã nghe nhạc trên xe buýt sáng nay.",no:"Gần đây tôi không nghe nhạc nhiều.",f:"Bạn thích loại nhạc nào?"}},
+    {core:"dance",  phrase:"dance",             vi:"nhảy múa",           emoji:"💃",audio:{q:"17.wav",yes:"18.wav",no:"19.wav",f:"20.wav"},scripts:{q:"When did you last dance?",yes:"I danced at my cousin's birthday party.",no:"I'm too shy to dance!",f:"What song were you dancing to?"},vi_s:{q:"Lần cuối bạn nhảy múa là khi nào?",yes:"Tôi đã nhảy trong bữa tiệc sinh nhật của anh/chị họ.",no:"Tôi quá ngại để nhảy.",f:"Bạn đã nhảy theo bài hát nào?"}},
+  ]},
+  {id:"outing", label:"🚴 Ra ngoài",   color:"#FF9F43",light:"#FFF5E6",emoji:"🚴",desc:"Vận động & hoạt động ngoài trời",verbs:[
+    {core:"get",    phrase:"get on your bike",  vi:"leo lên xe đạp",    emoji:"🚲",audio:{q:"1.wav",yes:"2.wav",no:"3.wav",f:"4.wav"},scripts:{q:"When did you last get on your bike?",yes:"I got on my bike this morning.",no:"My bike needs fixing!",f:"Where did you ride to?"},vi_s:{q:"Lần cuối bạn leo lên xe đạp là khi nào?",yes:"Sáng nay tôi đã leo lên xe đạp.",no:"Xe đạp của tôi cần sửa rồi!",f:"Bạn đã đạp xe đến đâu?"}},
+    {core:"get",    phrase:"get off your bike", vi:"xuống xe đạp",      emoji:"🛑",audio:{q:"5.wav",yes:"6.wav",no:"7.wav",f:"8.wav"},scripts:{q:"When did you last get off your bike?",yes:"I got off at the park gate.",no:"I rode all the way home without stopping.",f:"Why did you get off?"},vi_s:{q:"Lần cuối bạn xuống xe đạp là khi nào?",yes:"Tôi xuống xe ở cổng công viên.",no:"Tôi đạp xe thẳng về nhà không dừng.",f:"Tại sao bạn xuống xe?"}},
+    {core:"park",   phrase:"park your bike",    vi:"đỗ xe đạp",         emoji:"🅿️",audio:{q:"9.wav",yes:"10.wav",no:"11.wav",f:"12.wav"},scripts:{q:"When did you last park your bike?",yes:"I parked my bike outside the library.",no:"I left it in the garden.",f:"Is there a safe place to park near you?"},vi_s:{q:"Lần cuối bạn đỗ xe đạp là khi nào?",yes:"Tôi đã đỗ xe đạp trước thư viện.",no:"Tôi để nó trong vườn.",f:"Gần bạn có chỗ đỗ xe an toàn không?"}},
+    {core:"pedal",  phrase:"pedal uphill",       vi:"đạp xe lên dốc",    emoji:"⛰️",audio:{q:"13.wav",yes:"14.wav",no:"15.wav",f:"16.wav"},scripts:{q:"When did you last pedal uphill?",yes:"I pedalled uphill to school — so tiring!",no:"I get off and push my bike uphill.",f:"How steep was the hill?"},vi_s:{q:"Lần cuối bạn đạp xe lên dốc là khi nào?",yes:"Tôi đã đạp xe lên dốc đến trường — rất mệt!",no:"Tôi thường xuống xe và dắt xe lên dốc.",f:"Con dốc đó dốc đến mức nào?"}},
+    {core:"coast",  phrase:"coast downhill",     vi:"lao xe xuống dốc",  emoji:"🏔️",audio:{q:"17.wav",yes:"18.wav",no:"19.wav",f:"20.wav"},scripts:{q:"When did you last coast downhill?",yes:"I coasted down a big hill — so fast!",no:"The road near me is quite flat.",f:"Was it scary or exciting?"},vi_s:{q:"Lần cuối bạn lao xe xuống dốc là khi nào?",yes:"Tôi đã lao xuống một con dốc lớn — rất nhanh!",no:"Con đường gần nhà tôi khá bằng phẳng.",f:"Bạn thấy sợ hay thấy thú vị?"}},
+    {core:"take",   phrase:"take the bus",       vi:"đi xe buýt",        emoji:"🚌",audio:{q:"21.wav",yes:"22.wav",no:"23.wav",f:"24.wav"},scripts:{q:"When did you last take the bus?",yes:"I took the bus to school yesterday.",no:"My parents drive me to school.",f:"How long was the bus ride?"},vi_s:{q:"Lần cuối bạn đi xe buýt là khi nào?",yes:"Hôm qua tôi đi xe buýt đến trường.",no:"Bố mẹ chở tôi đến trường.",f:"Chuyến xe buýt kéo dài bao lâu?"}},
+    {core:"swim",   phrase:"swim",               vi:"bơi lội",           emoji:"🏊",audio:{q:"25.wav",yes:"26.wav",no:"27.wav",f:"28.wav"},scripts:{q:"When did you last swim?",yes:"I swam at the pool last Sunday.",no:"I haven't been swimming this month.",f:"Where did you swim?"},vi_s:{q:"Lần cuối bạn bơi là khi nào?",yes:"Tôi đã bơi ở hồ bơi vào Chủ nhật tuần trước.",no:"Tháng này tôi chưa đi bơi.",f:"Bạn đã bơi ở đâu?"}},
+    {core:"go",     phrase:"go to the park",     vi:"đi công viên",      emoji:"🌳",audio:{q:"29.wav",yes:"30.wav",no:"31.wav",f:"32.wav"},scripts:{q:"When did you last go to the park?",yes:"I went to the park after school yesterday.",no:"I've been staying home recently.",f:"What did you do at the park?"},vi_s:{q:"Lần cuối bạn đi công viên là khi nào?",yes:"Hôm qua tôi đã đi công viên sau giờ học.",no:"Gần đây tôi ở nhà nhiều hơn.",f:"Bạn đã làm gì ở công viên?"}},
+  ]},
+  {id:"social", label:"🎉 Xã hội",     color:"#FD79A8",light:"#FFF0F6",emoji:"🎉",desc:"Gặp gỡ, lễ kỷ niệm & trải nghiệm",verbs:[
+    {core:"celebrate",phrase:"celebrate a birthday",  vi:"mừng sinh nhật",    emoji:"🎂",audio:{q:"1.wav",yes:"2.wav",no:"3.wav",f:"4.wav"},scripts:{q:"When did you last celebrate a birthday?",yes:"I celebrated my friend's birthday last weekend.",no:"The next birthday is my mom's next month!",f:"Whose birthday was it?"},vi_s:{q:"Lần cuối bạn mừng sinh nhật là khi nào?",yes:"Tôi đã mừng sinh nhật bạn tôi vào cuối tuần trước.",no:"Sinh nhật tiếp theo là của mẹ tôi vào tháng sau!",f:"Đó là sinh nhật của ai?"}},
+    {core:"stay",     phrase:"stay with your grandma",vi:"ở nhà bà",           emoji:"👵",audio:{q:"5.wav",yes:"6.wav",no:"7.wav",f:"8.wav"},scripts:{q:"When did you last stay with your grandma?",yes:"I stayed at grandma's house last school holiday.",no:"She lives far away so I don't visit often.",f:"What did you do together?"},vi_s:{q:"Lần cuối bạn ở nhà bà là khi nào?",yes:"Tôi đã ở nhà bà vào kỳ nghỉ học trước.",no:"Bà ở xa nên tôi không ghé thăm thường xuyên.",f:"Hai bà cháu đã làm gì cùng nhau?"}},
+    {core:"eat",      phrase:"eat out",               vi:"ăn ngoài nhà hàng", emoji:"🍜",audio:{q:"9.wav",yes:"10.wav",no:"11.wav",f:"12.wav"},scripts:{q:"When did you last eat out?",yes:"I ate out at a noodle shop last Saturday.",no:"We mostly cook at home.",f:"What did you eat?"},vi_s:{q:"Lần cuối bạn ăn ngoài là khi nào?",yes:"Tôi đã ăn ở quán mì vào thứ Bảy tuần trước.",no:"Chúng tôi thường nấu ăn ở nhà.",f:"Bạn đã ăn món gì?"}},
+    {core:"visit",    phrase:"visit someone",         vi:"đến thăm ai đó",    emoji:"🏠",audio:{q:"13.wav",yes:"14.wav",no:"15.wav",f:"16.wav"},scripts:{q:"When did you last visit someone?",yes:"I visited my aunt last Sunday.",no:"I haven't visited anyone recently.",f:"How long did you stay?"},vi_s:{q:"Lần cuối bạn đến thăm ai đó là khi nào?",yes:"Tôi đã đến thăm dì tôi vào Chủ nhật tuần trước.",no:"Gần đây tôi chưa thăm ai cả.",f:"Bạn ở lại bao lâu?"}},
+    {core:"laugh",    phrase:"laugh a lot",           vi:"cười thật nhiều",   emoji:"😂",audio:{q:"17.wav",yes:"18.wav",no:"19.wav",f:"20.wav"},scripts:{q:"When did you last laugh a lot?",yes:"I laughed so much watching a funny video yesterday!",no:"It's been a serious week!",f:"What made you laugh?"},vi_s:{q:"Lần cuối bạn cười thật nhiều là khi nào?",yes:"Hôm qua tôi cười rất nhiều khi xem một video hài!",no:"Tuần này khá nghiêm túc!",f:"Điều gì làm bạn cười?"}},
+    {core:"carry",    phrase:"carry a baby",          vi:"bế em bé",          emoji:"👶",audio:{q:"21.wav",yes:"22.wav",no:"23.wav",f:"24.wav"},scripts:{q:"When did you last carry a baby?",yes:"I carried my baby cousin last Sunday.",no:"I've never carried a baby!",f:"How old was the baby?"},vi_s:{q:"Lần cuối bạn bế em bé là khi nào?",yes:"Tôi đã bế em họ của mình vào Chủ nhật tuần trước.",no:"Tôi chưa từng bế em bé!",f:"Em bé bao nhiêu tuổi?"}},
+  ]},
+  {id:"senses", label:"👁️ Giác quan",  color:"#2BCBBA",light:"#E6FFFE",emoji:"👁️",desc:"Quan sát, khám phá & giác quan",verbs:[
+    {core:"see",    phrase:"see something amazing",  vi:"nhìn thấy thứ gì tuyệt vời",emoji:"😲",audio:{q:"1.wav",yes:"2.wav",no:"3.wav",f:"4.wav"},scripts:{q:"When did you last see something amazing?",yes:"I saw a beautiful rainbow last evening!",no:"Nothing amazing recently — I need to look more!",f:"What did you see?"},vi_s:{q:"Lần cuối bạn nhìn thấy điều gì đó tuyệt vời là khi nào?",yes:"Tôi đã thấy một cầu vồng tuyệt đẹp vào tối hôm qua!",no:"Gần đây không có gì đặc biệt — tôi cần quan sát nhiều hơn!",f:"Bạn đã nhìn thấy gì?"}},
+    {core:"smell",  phrase:"smell something nice",   vi:"ngửi thấy mùi dễ chịu",   emoji:"👃",audio:{q:"5.wav",yes:"6.wav",no:"7.wav",f:"8.wav"},scripts:{q:"When did you last smell something nice?",yes:"I smelled fresh bread from the bakery this morning.",no:"I had a cold so I couldn't smell anything!",f:"What was the smell?"},vi_s:{q:"Lần cuối bạn ngửi thấy mùi dễ chịu là khi nào?",yes:"Tôi đã ngửi thấy mùi bánh mì mới từ tiệm bánh sáng nay.",no:"Tôi bị cảm nên không ngửi thấy gì!",f:"Đó là mùi gì?"}},
+    {core:"taste",  phrase:"taste something new",    vi:"nếm thử thứ mới",         emoji:"👅",audio:{q:"9.wav",yes:"10.wav",no:"11.wav",f:"12.wav"},scripts:{q:"When did you last taste something new?",yes:"I tasted dragon fruit for the first time last week.",no:"I'm quite a picky eater!",f:"Did you like the taste?"},vi_s:{q:"Lần cuối bạn nếm thử một thứ mới là khi nào?",yes:"Tôi đã nếm thử thanh long lần đầu tiên vào tuần trước.",no:"Tôi khá kén ăn!",f:"Bạn có thích vị đó không?"}},
+    {core:"look",   phrase:"look at the stars",      vi:"ngắm sao",                emoji:"⭐",audio:{q:"13.wav",yes:"14.wav",no:"15.wav",f:"16.wav"},scripts:{q:"When did you last look at the stars?",yes:"I looked at the stars from the rooftop last night.",no:"The city lights make it hard to see stars.",f:"Could you see many stars?"},vi_s:{q:"Lần cuối bạn ngắm các vì sao là khi nào?",yes:"Tôi đã ngắm sao từ sân thượng tối hôm qua.",no:"Ánh đèn thành phố làm cho việc nhìn thấy sao trở nên khó khăn.",f:"Bạn có thấy nhiều ngôi sao không?"}},
+    {core:"wiggle", phrase:"wiggle your nose",       vi:"nhún mũi",                emoji:"👃",audio:{q:"17.wav",yes:"18.wav",no:"19.wav",f:"20.wav"},scripts:{q:"When did you last wiggle your nose?",yes:"I wiggled my nose trying to smell something funny.",no:"Ha! I don't think I ever do that!",f:"Why did you wiggle it?"},vi_s:{q:"Lần cuối bạn nhún mũi là khi nào?",yes:"Tôi nhún mũi khi cố ngửi một mùi lạ.",no:"Ha! Tôi nghĩ mình chưa bao giờ làm vậy!",f:"Tại sao bạn lại nhún mũi?"}},
+    {core:"cover",  phrase:"cover your eyes",        vi:"che mắt",                 emoji:"🙈",audio:{q:"21.wav",yes:"22.wav",no:"23.wav",f:"24.wav"},scripts:{q:"When did you last cover your eyes?",yes:"I covered my eyes during a scary part of the movie!",no:"I'm brave — I don't cover my eyes!",f:"What were you covering your eyes from?"},vi_s:{q:"Lần cuối bạn che mắt là khi nào?",yes:"Tôi đã che mắt trong một cảnh đáng sợ của bộ phim!",no:"Tôi rất can đảm — tôi không che mắt!",f:"Bạn đã che mắt vì điều gì?"}},
+    {core:"hide",   phrase:"hide something",         vi:"giấu thứ gì đó",          emoji:"🫙",audio:{q:"25.wav",yes:"26.wav",no:"27.wav",f:"28.wav"},scripts:{q:"When did you last hide something?",yes:"I hid Easter eggs for my little brother.",no:"I can't remember hiding anything!",f:"Where did you hide it?"},vi_s:{q:"Lần cuối bạn giấu thứ gì đó là khi nào?",yes:"Tôi đã giấu trứng Phục Sinh cho em trai tôi.",no:"Tôi không nhớ đã giấu thứ gì!",f:"Bạn đã giấu nó ở đâu?"}},
+  ]},
+  {id:"games",  label:"🎮 Trò chơi",   color:"#FDCB6E",light:"#FFFAE6",emoji:"🎮",desc:"Trò chơi, thi đấu & vui chơi",verbs:[
+    {core:"win",   phrase:"win a game",          vi:"thắng một trò chơi",emoji:"🏆",audio:{q:"1.wav",yes:"2.wav",no:"3.wav",f:"4.wav"},scripts:{q:"When did you last win a game?",yes:"I won a board game last Sunday!",no:"I lost the last three games I played!",f:"What game did you win?"},vi_s:{q:"Lần cuối bạn thắng một trò chơi là khi nào?",yes:"Tôi đã thắng một trò chơi cờ vào Chủ nhật tuần trước!",no:"Tôi đã thua ba trò chơi gần đây!",f:"Bạn đã thắng trò chơi nào?"}},
+    {core:"lose",  phrase:"lose a game",         vi:"thua một trò chơi", emoji:"😅",audio:{q:"5.wav",yes:"6.wav",no:"7.wav",f:"8.wav"},scripts:{q:"When did you last lose a game?",yes:"I lost at chess yesterday.",no:"I've been on a winning streak!",f:"What game did you lose?"},vi_s:{q:"Lần cuối bạn thua một trò chơi là khi nào?",yes:"Tôi đã thua cờ vua hôm qua.",no:"Tôi đang có chuỗi chiến thắng!",f:"Bạn đã thua trò chơi nào?"}},
+    {core:"feel",  phrase:"feel busy",           vi:"cảm thấy bận rộn",  emoji:"😤",audio:{q:"9.wav",yes:"10.wav",no:"11.wav",f:"12.wav"},scripts:{q:"When did you last feel busy?",yes:"I felt really busy last week with lots of homework.",no:"I've had a relaxed week!",f:"What made you feel busy?"},vi_s:{q:"Lần cuối bạn cảm thấy bận rộn là khi nào?",yes:"Tôi cảm thấy rất bận vào tuần trước vì có nhiều bài tập.",no:"Tuần này tôi khá thư giãn!",f:"Điều gì khiến bạn bận rộn?"}},
+    {core:"swim",  phrase:"swim in the ocean",  vi:"bơi ở biển",        emoji:"🌊",audio:{q:"13.wav",yes:"14.wav",no:"15.wav",f:"16.wav"},scripts:{q:"When did you last swim in the ocean?",yes:"I swam in the ocean last summer holiday!",no:"I've only swum in a pool.",f:"Which beach was it?"},vi_s:{q:"Lần cuối bạn bơi ở biển là khi nào?",yes:"Tôi đã bơi ở biển vào kỳ nghỉ hè năm ngoái!",no:"Tôi chỉ bơi ở hồ bơi thôi.",f:"Đó là bãi biển nào?"}},
+    {core:"start", phrase:"start something new",vi:"bắt đầu thứ gì mới",emoji:"🆕",audio:{q:"17.wav",yes:"18.wav",no:"19.wav",f:"20.wav"},scripts:{q:"When did you last start something new?",yes:"I started a new hobby — painting!",no:"Everything has been the same routine.",f:"What did you start?"},vi_s:{q:"Lần cuối bạn bắt đầu một điều mới là khi nào?",yes:"Tôi đã bắt đầu một sở thích mới — vẽ tranh!",no:"Mọi thứ vẫn theo thói quen cũ.",f:"Bạn đã bắt đầu điều gì?"}},
+  ]},
+  {id:"care",   label:"🤗 Yêu thương", color:"#E84393",light:"#FFF0F8",emoji:"🤗",desc:"Chăm sóc, yêu thương & giúp đỡ",verbs:[
+    {core:"help",    phrase:"help someone",            vi:"giúp đỡ ai đó",       emoji:"🙌",audio:{q:"1.wav",yes:"2.wav",no:"3.wav",f:"4.wav"},scripts:{q:"When did you last help someone?",yes:"I helped my mom carry the groceries yesterday.",no:"I've been busy with my own work this week.",f:"Who did you help and what did you do?"},vi_s:{q:"Lần cuối bạn giúp ai đó là khi nào?",yes:"Tôi đã giúp mẹ mang đồ tạp hóa hôm qua.",no:"Tuần này tôi bận với công việc của mình.",f:"Bạn đã giúp ai và bạn đã làm gì?"}},
+    {core:"hold",    phrase:"hold hands with someone", vi:"nắm tay ai đó",        emoji:"🤝",audio:{q:"5.wav",yes:"6.wav",no:"7.wav",f:"8.wav"},scripts:{q:"When did you last hold hands with someone?",yes:"I held my little sister's hand when we crossed the street.",no:"I don't often hold hands with people.",f:"Who did you hold hands with?"},vi_s:{q:"Lần cuối bạn nắm tay ai đó là khi nào?",yes:"Tôi đã nắm tay em gái khi chúng tôi băng qua đường.",no:"Tôi không thường nắm tay người khác.",f:"Bạn đã nắm tay ai?"}},
+    {core:"pick",    phrase:"pick someone up",         vi:"bế hoặc đỡ ai đó lên", emoji:"🫂",audio:{q:"9.wav",yes:"10.wav",no:"11.wav",f:"12.wav"},scripts:{q:"When did you last pick someone up?",yes:"I picked up my baby cousin last Sunday.",no:"I'm not strong enough to pick people up yet!",f:"Who did you pick up?"},vi_s:{q:"Lần cuối bạn bế hoặc đỡ ai đó lên là khi nào?",yes:"Tôi đã bế em họ nhỏ vào Chủ nhật tuần trước.",no:"Tôi chưa đủ khỏe để bế người khác!",f:"Bạn đã bế ai?"}},
+    {core:"hug",     phrase:"hug someone",             vi:"ôm ai đó",             emoji:"🤗",audio:{q:"13.wav",yes:"14.wav",no:"15.wav",f:"16.wav"},scripts:{q:"When did you last hug someone?",yes:"I hugged my grandma when she visited yesterday.",no:"I'm not a very huggy person!",f:"Who did you hug and why?"},vi_s:{q:"Lần cuối bạn ôm ai đó là khi nào?",yes:"Tôi đã ôm bà khi bà đến thăm hôm qua.",no:"Tôi không phải là người hay ôm người khác.",f:"Bạn đã ôm ai và vì sao?"}},
+    {core:"feed",    phrase:"feed your pet",           vi:"cho thú cưng ăn",      emoji:"🐾",audio:{q:"17.wav",yes:"18.wav",no:"19.wav",f:"20.wav"},scripts:{q:"When did you last feed your pet?",yes:"I fed my dog this morning before school.",no:"I don't have a pet right now.",f:"What does your pet like to eat?"},vi_s:{q:"Lần cuối bạn cho thú cưng ăn là khi nào?",yes:"Tôi đã cho chó ăn sáng nay trước khi đi học.",no:"Hiện tại tôi không có thú cưng.",f:"Thú cưng của bạn thích ăn gì?"}},
+    {core:"give",    phrase:"give your pet a bath",    vi:"tắm cho thú cưng",     emoji:"🛁",audio:{q:"21.wav",yes:"22.wav",no:"23.wav",f:"24.wav"},scripts:{q:"When did you last give your pet a bath?",yes:"I gave my dog a bath last Saturday — so wet!",no:"My pet doesn't need baths very often.",f:"Did your pet enjoy the bath?"},vi_s:{q:"Lần cuối bạn tắm cho thú cưng là khi nào?",yes:"Tôi đã tắm cho chó vào thứ Bảy tuần trước — rất ướt!",no:"Thú cưng của tôi không cần tắm thường xuyên.",f:"Thú cưng của bạn có thích tắm không?"}},
+    {core:"protect", phrase:"protect someone",         vi:"bảo vệ ai đó",         emoji:"🛡️",audio:{q:"25.wav",yes:"26.wav",no:"27.wav",f:"28.wav"},scripts:{q:"When did you last protect someone?",yes:"I protected my little brother from a bully at school.",no:"I haven't needed to protect anyone recently.",f:"Who did you protect and from what?"},vi_s:{q:"Lần cuối bạn bảo vệ ai đó là khi nào?",yes:"Tôi đã bảo vệ em trai khỏi một kẻ bắt nạt ở trường.",no:"Gần đây tôi không cần bảo vệ ai.",f:"Bạn đã bảo vệ ai và khỏi điều gì?"}},
+    {core:"teach",   phrase:"teach someone something", vi:"dạy ai đó thứ gì",     emoji:"👩‍🏫",audio:{q:"29.wav",yes:"30.wav",no:"31.wav",f:"32.wav"},scripts:{q:"When did you last teach someone something?",yes:"I taught my little sister how to ride a bike last weekend.",no:"I don't feel confident enough to teach yet.",f:"What did you teach and who did you teach it to?"},vi_s:{q:"Lần cuối bạn dạy ai đó điều gì là khi nào?",yes:"Tôi đã dạy em gái cách đi xe đạp vào cuối tuần trước.",no:"Tôi chưa đủ tự tin để dạy người khác.",f:"Bạn đã dạy điều gì và dạy cho ai?"}},
+    {core:"care",    phrase:"take care of your pet",   vi:"chăm sóc thú cưng",   emoji:"🐶",audio:{q:"33.wav",yes:"34.wav",no:"35.wav",f:"36.wav"},scripts:{q:"When did you last take care of your pet?",yes:"I took care of my cat all day when she was sick.",no:"I'd love a pet but I don't have one.",f:"What do you do to take care of your pet?"},vi_s:{q:"Lần cuối bạn chăm sóc thú cưng là khi nào?",yes:"Tôi đã chăm sóc con mèo cả ngày khi nó bị ốm.",no:"Tôi rất muốn có thú cưng nhưng hiện tại chưa có.",f:"Bạn làm gì để chăm sóc thú cưng?"}},
+  ]},
+];
+
+// ══════════════════════════════════
+// STATE
+// ══════════════════════════════════
+let seen=new Set(), activecat='all', randData=null;
+let showVI=true, showVF=true;
+let curAudio=null, curBtn=null;
+
+// Recorder state
+let mediaStream=null, mediaRecorder=null, recChunks=[], recBlob=null;
+let recTimerInt=null, recSecs=0;
+// per-panel recorder instances keyed by panelId
+const recStates={};  // {blob, url}
+
+document.getElementById('tog-vi').addEventListener('change',e=>{
+  showVI=e.target.checked;
+  document.querySelectorAll('.vi-el').forEach(el=>el.style.display=showVI?'':'none');
+});
+document.getElementById('tog-vf').addEventListener('change',e=>{
+  showVF=e.target.checked;
+  document.querySelectorAll('.vfp').forEach(el=>el.style.display=showVF?'':'none');
+});
+
+// ══════════════════════════════════
+// AUDIO PLAYBACK
+// ══════════════════════════════════
+function playAu(url,btn){
+  if(curAudio){curAudio.pause();curAudio.currentTime=0;}
+  if(curBtn){curBtn.classList.remove('playing');}
+  if(curBtn===btn){curAudio=null;curBtn=null;return;}
+  const a=new Audio(url);
+  curAudio=a; curBtn=btn;
+  btn.classList.add('playing');
+  a.play().catch(()=>{});
+  a.onended=()=>{btn.classList.remove('playing');curAudio=null;curBtn=null;};
+  a.onerror=()=>{btn.classList.remove('playing');btn.textContent='❌';};
+}
+
+function mkIP(cls,url){
+  const b=document.createElement('button');
+  b.className='iplay '+cls; b.textContent='🔊';
+  b.onclick=e=>{e.stopPropagation();playAu(url,b);};
+  return b;
+}
+
+// ══════════════════════════════════
+// RECORDING
+// ══════════════════════════════════
+async function getMic(){
+  if(mediaStream) return mediaStream;
+  try{
+    mediaStream=await navigator.mediaDevices.getUserMedia({audio:true});
+    return mediaStream;
+  }catch(e){
+    alert('⚠️ Không thể truy cập micro. Hãy cho phép quyền trong cài đặt trình duyệt.');
+    return null;
+  }
+}
+
+// Choose best MIME type for iPad/iOS + Chrome/Firefox
+function bestMime(){
+  const types=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus','audio/ogg',''];
+  for(const t of types){if(!t||MediaRecorder.isTypeSupported(t)) return t;}
+  return '';
+}
+
+function buildRecPanel(panelId, dark=false){
+  const wrap=document.createElement('div');
+  wrap.className=dark?'rnd-rec-panel':'rec-panel';
+  wrap.dataset.panelId=panelId;
+
+  const startBtn=document.createElement('button');
+  startBtn.className='rec-btn rec-start';
+  startBtn.innerHTML='🎙️ Ghi âm';
+
+  const timer=document.createElement('span');
+  timer.className='rec-timer'; timer.textContent='';
+
+  const playBtn=document.createElement('button');
+  playBtn.className='rec-btn rec-play'; playBtn.innerHTML='▶️ Nghe lại';
+  playBtn.style.display='none';
+
+  const hint=document.createElement('div');
+  hint.className=dark?'rnd-rec-hint':'rec-hint';
+  hint.textContent='🎙️ Ghi âm câu trả lời của bạn, rồi nghe lại để so sánh!';
+
+  wrap.appendChild(startBtn);
+  wrap.appendChild(timer);
+  wrap.appendChild(playBtn);
+  wrap.appendChild(hint);
+
+  let recInterval=null, secs=0;
+  let localBlob=null, localUrl=null, localAudio=null;
+
+  startBtn.onclick=async e=>{
+    e.stopPropagation();
+    if(mediaRecorder&&mediaRecorder.state==='recording'){
+      // STOP
+      mediaRecorder.stop();
+      clearInterval(recInterval);
+      startBtn.classList.remove('recording');
+      startBtn.innerHTML='🎙️ Ghi âm';
+      timer.textContent='';
+    } else {
+      // START
+      const stream=await getMic();
+      if(!stream) return;
+      const mime=bestMime();
+      const opts=mime?{mimeType:mime}:{};
+      try{
+        mediaRecorder=new MediaRecorder(stream,opts);
+      }catch(err){
+        mediaRecorder=new MediaRecorder(stream);
+      }
+      recChunks=[];
+      mediaRecorder.ondataavailable=ev=>{if(ev.data&&ev.data.size>0) recChunks.push(ev.data);};
+      mediaRecorder.onstop=()=>{
+        const mime2=mediaRecorder.mimeType||'audio/webm';
+        localBlob=new Blob(recChunks,{type:mime2});
+        if(localUrl) URL.revokeObjectURL(localUrl);
+        localUrl=URL.createObjectURL(localBlob);
+        playBtn.style.display='inline-flex';
+        hint.textContent='✅ Đã ghi xong! Bấm ▶️ để nghe lại và so sánh với mẫu.';
+      };
+      mediaRecorder.start(100);
+      secs=0; timer.textContent='0:00';
+      startBtn.classList.add('recording');
+      startBtn.innerHTML='⏹️ Dừng';
+      recInterval=setInterval(()=>{
+        secs++;
+        const m=Math.floor(secs/60), s=secs%60;
+        timer.textContent=m+':'+(s<10?'0':'')+s;
+        if(secs>=120){startBtn.click();} // auto-stop at 2 min
+      },1000);
+    }
+  };
+
+  playBtn.onclick=e=>{
+    e.stopPropagation();
+    if(!localUrl) return;
+    if(localAudio&&!localAudio.paused){
+      localAudio.pause(); localAudio.currentTime=0;
+      playBtn.classList.remove('playing'); playBtn.innerHTML='▶️ Nghe lại'; return;
+    }
+    localAudio=new Audio(localUrl);
+    playBtn.classList.add('playing'); playBtn.innerHTML='⏹️ Đang phát…';
+    localAudio.play().catch(()=>{});
+    localAudio.onended=()=>{playBtn.classList.remove('playing'); playBtn.innerHTML='▶️ Nghe lại';};
+  };
+
+  return wrap;
+}
+
+// ══════════════════════════════════
+// VFP
+// ══════════════════════════════════
+function mkVFP(core,extra){
+  const vf=VD[core]; if(!vf) return null;
+  const p=document.createElement('div');
+  p.className='vfp'+(extra?' '+extra:'');
+  p.style.display=showVF?'':'none';
+  p.innerHTML=`<div class="vfp-title">📖 Chia động từ</div>
+    <div class="vfp-row">
+      <div class="vfp-item"><div class="vfp-form">${vf.v1}</div><div class="vfp-ipa">${vf.i1}</div><div class="vfp-lbl">V1</div></div>
+      <div class="vfp-item"><div class="vfp-form">${vf.v2}</div><div class="vfp-ipa">${vf.i2}</div><div class="vfp-lbl">V2</div></div>
+      <div class="vfp-item"><div class="vfp-form">${vf.v3}</div><div class="vfp-ipa">${vf.i3}</div><div class="vfp-lbl">V3</div></div>
+    </div>`;
+  return p;
+}
+
+// ══════════════════════════════════
+// LINE BUILDER — text + inline 🔊
+// ══════════════════════════════════
+function mkLine(lbl,lblColor,enText,viText,audioUrl,iplayCls,bgCls,dark=false){
+  const wrap=document.createElement('div');
+  if(bgCls) wrap.className=bgCls;
+
+  const row=document.createElement('div'); row.className='line';
+
+  const btn=mkIP(iplayCls, audioUrl);
+  row.appendChild(btn);
+
+  const content=document.createElement('div'); content.className='line-content';
+  if(lbl){
+    const l=document.createElement('div'); l.className='line-label';
+    l.style.color=dark?'rgba(253,203,110,.85)':lblColor;
+    l.textContent=lbl; content.appendChild(l);
+  }
+  const en=document.createElement('div'); en.className='line-en';
+  if(dark) en.style.color='#fff';
+  en.textContent=enText; content.appendChild(en);
+
+  const vi=document.createElement('div'); vi.className='line-vi vi-el';
+  vi.style.display=showVI?'':'none';
+  if(dark) vi.style.color='rgba(255,255,255,.55)';
+  vi.textContent=viText; content.appendChild(vi);
+
+  row.appendChild(content);
+  wrap.appendChild(row);
+  return wrap;
+}
+
+// ══════════════════════════════════
+// VERB CARD BUILDER
+// ══════════════════════════════════
+function buildCard(v,catId,idx,color,light){
+  const card=document.createElement('div');
+  card.className='verb-card'; card.style.borderLeftColor=color;
+
+  // ─ FRONT ─
+  const front=document.createElement('div'); front.className='front';
+
+  const tag=document.createElement('span'); tag.className='verb-tag';
+  tag.style.background=color; tag.textContent=`${v.emoji} ${v.vi}`;
+  front.appendChild(tag);
+
+  const ph=document.createElement('div'); ph.className='v-phrase';
+  ph.innerHTML=`<strong>When did you last</strong> ${v.phrase}?`;
+  front.appendChild(ph);
+
+  const vfp=mkVFP(v.core); if(vfp) front.appendChild(vfp);
+
+  // Question line
+  const qblock=document.createElement('div');
+  qblock.className='q-block'; qblock.style.background=light;
+  qblock.appendChild(mkLine('❓ Câu hỏi',color,
+    v.scripts.q, v.vi_s.q,
+    AB+catId+'/'+v.audio.q, 'iplay-q', null, false));
+  front.appendChild(qblock);
+
+  const hint=document.createElement('div'); hint.className='tap-hint';
+  hint.textContent='👆 Bấm thẻ để xem câu trả lời mẫu'; front.appendChild(hint);
+
+  front.appendChild(buildRecPanel('f-'+catId+'-'+idx));
+
+  // ─ BACK ─
+  const back=document.createElement('div'); back.className='back';
+
+  const tag2=document.createElement('span'); tag2.className='verb-tag';
+  tag2.style.background=color; tag2.textContent=`${v.emoji} ${v.vi}`;
+  back.appendChild(tag2);
+
+  const bt=document.createElement('div'); bt.className='back-title';
+  bt.style.color=color; bt.textContent=`When did you last ${v.phrase}?`;
+  back.appendChild(bt);
+
+  back.appendChild(mkLine('✅ Trả lời CÓ','#26de81',
+    v.scripts.yes, v.vi_s.yes,
+    AB+catId+'/'+v.audio.yes, 'iplay-yes','ans-yes-bg'));
+  back.appendChild(mkLine('❌ Trả lời KHÔNG','#FF6B6B',
+    v.scripts.no, v.vi_s.no,
+    AB+catId+'/'+v.audio.no, 'iplay-no','ans-no-bg'));
+  back.appendChild(mkLine('💬 Hỏi thêm','#4A90D9',
+    v.scripts.f, v.vi_s.f,
+    AB+catId+'/'+v.audio.f, 'iplay-fol','ans-fol-bg'));
+
+  const note=document.createElement('div'); note.className='tap-hint';
+  note.textContent='👆 Bấm lại để xem câu hỏi'; back.appendChild(note);
+
+  back.appendChild(buildRecPanel('b-'+catId+'-'+idx));
+
+  card.appendChild(front); card.appendChild(back);
+  card.onclick=()=>{
+    card.classList.toggle('flipped');
+    seen.add(catId+'-'+idx);
+    if(activecat===catId) updateProg(catId);
+  };
+  return card;
+}
+
+// ══════════════════════════════════
+// NAV + PROGRESS
+// ══════════════════════════════════
+function getAll(){
+  return CATS.filter(c=>c.id!=='all'&&c.id!=='random')
+    .flatMap(c=>c.verbs.map(v=>({...v,catId:c.id,catColor:c.color,catLabel:c.label})));
+}
+
+function buildNav(){
+  const nav=document.getElementById('cat-nav');
+  CATS.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='cat-btn'+(c.id==='all'?' active':'');
+    b.dataset.id=c.id; b.textContent=c.label;
+    b.onclick=()=>switchTab(c.id);
+    nav.appendChild(b);
+  });
+}
+
+function switchTab(id){
+  activecat=id;
+  document.querySelectorAll('.cat-btn').forEach(b=>{b.classList.remove('active');b.style.background='';b.style.color='';});
+  const ab=document.querySelector(`.cat-btn[data-id="${id}"]`);
+  ab.classList.add('active');
+  const cat=CATS.find(c=>c.id===id);
+  ab.style.background=cat.color; ab.style.color='#fff';
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  const sp=id!=='all'&&id!=='random';
+  document.getElementById('prog-wrap').style.display=sp?'flex':'none';
+  if(sp) updateProg(id);
+}
+
+function updateProg(catId){
+  const cat=CATS.find(c=>c.id===catId);
+  if(!cat||!cat.verbs.length) return;
+  const total=cat.verbs.length, done=cat.verbs.filter((_,i)=>seen.has(catId+'-'+i)).length;
+  const pct=Math.round(done/total*100);
+  document.getElementById('prog-lbl').textContent=`${done} / ${total} đã xem`;
+  document.getElementById('bar-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+}
+
+// ══════════════════════════════════
+// ALL SECTION
+// ══════════════════════════════════
+function buildAll(){
+  const sec=document.createElement('div'); sec.className='section active'; sec.id='sec-all';
+  const hdr=document.createElement('div'); hdr.className='sec-header';
+  hdr.style.background='linear-gradient(135deg,#1B2A4A,#2E4080)';
+  hdr.innerHTML=`<div class="be">🌟</div><div><h2>Tất cả chủ đề</h2><p>Chọn một chủ đề bên dưới!</p></div>`;
+  sec.appendChild(hdr);
+  const grid=document.createElement('div'); grid.className='all-grid';
+  CATS.filter(c=>c.id!=='all'&&c.id!=='random').forEach(c=>{
+    const card=document.createElement('div'); card.className='all-card';
+    card.style.background=`linear-gradient(135deg,${c.color},${c.color}CC)`;
+    card.innerHTML=`<div class="ae">${c.emoji}</div><div class="an">${c.label.replace(/^[^\s]+\s/,'')}</div><div class="ac">${c.verbs.length} câu hỏi</div>`;
+    card.onclick=()=>switchTab(c.id); grid.appendChild(card);
+  });
+  sec.appendChild(grid); return sec;
+}
+
+// ══════════════════════════════════
+// RANDOM SECTION
+// ══════════════════════════════════
+function buildRandom(){
+  const sec=document.createElement('div'); sec.className='section'; sec.id='sec-random';
+  const hdr=document.createElement('div'); hdr.className='sec-header';
+  hdr.style.background='linear-gradient(135deg,#6C5CE7,#A55EEA)';
+  hdr.innerHTML=`<div class="be">🎲</div><div><h2>Luyện tập ngẫu nhiên</h2><p>Câu hỏi bất kỳ từ tất cả chủ đề!</p></div>`;
+  sec.appendChild(hdr);
+
+  const box=document.createElement('div'); box.className='rand-box';
+
+  // question line area
+  const qArea=document.createElement('div'); qArea.id='rnd-q-area';
+  qArea.innerHTML=`<p style="color:rgba(255,255,255,.6);font-size:.86rem;margin-bottom:6px">Câu hỏi của bạn:</p>
+    <div class="rq" id="rq">Bấm nút bên dưới để bắt đầu! 👇</div>
+    <div class="rq-vi vi-el" id="rq-vi" style="display:${showVI?'':'none'}"></div>
+    <span class="rtag" id="rq-tag" style="background:rgba(255,255,255,.15)">–</span>`;
+  box.appendChild(qArea);
+
+  // VFP
+  const vfpWrap=document.createElement('div'); vfpWrap.id='rnd-vfp-wrap'; box.appendChild(vfpWrap);
+
+  // Q audio line
+  const qLineWrap=document.createElement('div'); qLineWrap.id='rnd-q-line'; box.appendChild(qLineWrap);
+
+  // answers (hidden until reveal)
+  const ansWrap=document.createElement('div'); ansWrap.className='rnd-answers'; ansWrap.id='rnd-ans';
+  box.appendChild(ansWrap);
+
+  // buttons row
+  const btnRow=document.createElement('div');
+  btnRow.style.cssText='margin-top:14px;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;';
+  const newBtn=document.createElement('button'); newBtn.className='rand-btn';
+  newBtn.textContent='🎲 Câu hỏi mới!'; newBtn.onclick=newRand;
+  const revBtn=document.createElement('button'); revBtn.className='rand-btn reveal';
+  revBtn.id='rev-btn'; revBtn.textContent='👁️ Xem câu trả lời'; revBtn.style.display='none';
+  revBtn.onclick=revealRand;
+  btnRow.appendChild(newBtn); btnRow.appendChild(revBtn);
+  box.appendChild(btnRow);
+
+  // recorder
+  box.appendChild(buildRecPanel('rnd-main', true));
+
+  sec.appendChild(box); return sec;
+}
+
+function newRand(){
+  const all=getAll();
+  randData=all[Math.floor(Math.random()*all.length)];
+
+  document.getElementById('rq').textContent=`When did you last ${randData.phrase}?`;
+  const vi=document.getElementById('rq-vi');
+  vi.textContent=randData.vi_s.q; vi.style.display=showVI?'':'none';
+  const tag=document.getElementById('rq-tag');
+  tag.textContent=randData.catLabel; tag.style.background=randData.catColor;
+
+  // VFP
+  const vw=document.getElementById('rnd-vfp-wrap'); vw.innerHTML='';
+  const vfp=mkVFP(randData.core,'rnd-vfp'); if(vfp) vw.appendChild(vfp);
+
+  // Q line with audio
+  const ql=document.getElementById('rnd-q-line'); ql.innerHTML='';
+  ql.appendChild(mkLine(null,null,
+    randData.scripts.q, randData.vi_s.q,
+    AB+randData.catId+'/'+randData.audio.q,'iplay-rq',null,true));
+
+  document.getElementById('rnd-ans').classList.remove('show');
+  document.getElementById('rnd-ans').innerHTML='';
+  document.getElementById('rev-btn').style.display='inline-block';
+}
+
+function revealRand(){
+  if(!randData) return;
+  const wrap=document.getElementById('rnd-ans'); wrap.innerHTML='';
+
+  [{lbl:'✅ Trả lời "Có"',  en:randData.scripts.yes, vi:randData.vi_s.yes, au:randData.audio.yes, cls:'iplay-ryes'},
+   {lbl:'❌ Trả lời "Không"',en:randData.scripts.no,  vi:randData.vi_s.no,  au:randData.audio.no,  cls:'iplay-rno'},
+   {lbl:'💬 Hỏi tiếp',      en:randData.scripts.f,   vi:randData.vi_s.f,   au:randData.audio.f,   cls:'iplay-rfol'},
+  ].forEach(item=>{
+    const card=document.createElement('div'); card.className='rnd-ans-card';
+    card.appendChild(mkLine(item.lbl,null,item.en,item.vi,
+      AB+randData.catId+'/'+item.au, item.cls, null, true));
+    wrap.appendChild(card);
+  });
+
+  wrap.classList.add('show');
+  document.getElementById('rev-btn').style.display='none';
+}
+
+// ══════════════════════════════════
+// CAT SECTION
+// ══════════════════════════════════
+function buildCat(cat){
+  const sec=document.createElement('div'); sec.className='section'; sec.id='sec-'+cat.id;
+  const hdr=document.createElement('div'); hdr.className='sec-header';
+  hdr.style.background=`linear-gradient(135deg,${cat.color},${cat.color}BB)`;
+  hdr.innerHTML=`<div class="be">${cat.emoji}</div><div><h2>${cat.label.replace(/^[^\s]+\s/,'')}</h2><p>${cat.desc} · ${cat.verbs.length} câu hỏi</p></div>`;
+  sec.appendChild(hdr);
+  const grid=document.createElement('div'); grid.className='cards-grid';
+  cat.verbs.forEach((v,i)=>grid.appendChild(buildCard(v,cat.id,i,cat.color,cat.light)));
+  sec.appendChild(grid); return sec;
+}
+
+// ══════════════════════════════════
+// INIT
+// ══════════════════════════════════
+function init(){
+  buildNav();
+  const root=document.getElementById('sections-root');
+  root.appendChild(buildAll());
+  root.appendChild(buildRandom());
+  CATS.filter(c=>c.id!=='all'&&c.id!=='random').forEach(c=>root.appendChild(buildCat(c)));
+  const fb=document.querySelector('.cat-btn[data-id="all"]');
+  if(fb){fb.style.background='#1B2A4A';fb.style.color='#fff';}
+}
+init();
+</script>
+</body>
+</html>
